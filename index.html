@@ -23,9 +23,9 @@
             background-attachment: fixed;
             min-height: 100vh;
             color: #1f2937;
-            overflow-x: hidden; /* Zapobiega paskom przewijania przy animacjach */
-            user-select: none; /* Zapobiega zaznaczaniu tekstu przy szybkim klikaniu */
-            -webkit-tap-highlight-color: transparent; /* Usuwa podświetlenie tapnięcia na mobile */
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .serif-title {
@@ -45,14 +45,14 @@
             filter: drop-shadow(0 4px 6px rgba(236, 72, 153, 0.3));
         }
 
-        .hidden-details {
+        .hidden-section {
             display: none;
             opacity: 0;
             transform: translateY(20px);
             transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .visible-details {
+        .visible-section {
             display: block;
             opacity: 1;
             transform: translateY(0);
@@ -75,7 +75,32 @@
             transform: scale(0.98);
         }
 
-        /* Nowa animacja dla klikanych serduszek */
+        /* Styl Polaroidów */
+        .polaroid {
+            background: white;
+            padding: 10px 10px 25px 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        /* Efekt najechania na zdjęcie - prostuje się i wychodzi na wierzch */
+        .polaroid:hover {
+            transform: scale(1.1) rotate(0deg) !important;
+            z-index: 50;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: auto;
+            border-radius: 2px;
+            aspect-ratio: 3/4; /* Ujednolicenie proporcji */
+            object-fit: cover;
+        }
+
+        /* Animacja serduszek */
         .click-heart {
             position: fixed;
             pointer-events: none;
@@ -85,25 +110,16 @@
         }
 
         @keyframes floatUp {
-            0% {
-                transform: translate(-50%, -50%) scale(0.5);
-                opacity: 0;
-            }
-            20% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.2);
-            }
-            100% {
-                transform: translate(-50%, -150%) scale(1);
-                opacity: 0;
-            }
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -150%) scale(1); opacity: 0; }
         }
     </style>
 </head>
-<body class="flex items-center justify-center p-4">
+<body class="flex flex-col items-center justify-center p-4 min-h-screen">
 
-    <!-- Główna karta -->
-    <div class="glass-card rounded-[2rem] w-full max-w-md p-8 md:p-10 text-center relative overflow-hidden z-10">
+    <!-- Główna karta (Pytanie i Szczegóły) -->
+    <div id="main-card" class="glass-card rounded-[2rem] w-full max-w-md p-8 md:p-10 text-center relative overflow-hidden z-10">
         
         <!-- Etap 1: Pytanie -->
         <div id="question-section">
@@ -120,14 +136,11 @@
             </h1>
 
             <div class="flex flex-col gap-4 justify-center items-center relative h-40">
-                <!-- Przycisk TAK -->
                 <button onclick="acceptProposal(event)" class="btn-primary w-full text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-xl shadow-pink-500/30 z-20 relative overflow-hidden group">
                     <span class="relative z-10">Tak, z przyjemnością!</span>
-                    <!-- Subtelny efekt błysku na przycisku -->
                     <div class="absolute inset-0 h-full w-full scale-0 rounded-2xl transition-all duration-300 group-hover:scale-100 group-hover:bg-white/20"></div>
                 </button>
 
-                <!-- Przycisk NIE (ucieka) -->
                 <button id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()" class="bg-white hover:bg-gray-50 text-gray-500 font-medium py-3 px-6 rounded-xl text-sm border border-gray-200 shadow-sm absolute bottom-0 z-10 transition-colors">
                     Nie, mam inne plany
                 </button>
@@ -135,13 +148,12 @@
         </div>
 
         <!-- Etap 2: Szczegóły -->
-        <div id="details-section" class="hidden-details mt-2">
+        <div id="details-section" class="hidden-section mt-2">
             <div class="w-16 h-1 bg-pink-200 mx-auto rounded-full mb-6"></div>
             
             <h3 class="serif-title text-3xl text-gray-900 mb-2">Jesteś cudowna.</h3>
             <p class="text-gray-500 mb-8 font-light">Nie mogę się doczekać naszego wieczoru.</p>
             
-            <!-- Karta ze szczegółami -->
             <div class="bg-white/60 rounded-2xl p-6 text-left shadow-sm border border-white space-y-4 mb-8">
                 <div class="flex items-start">
                     <div class="bg-pink-100 p-2 rounded-lg mr-4 text-pink-600">
@@ -174,9 +186,65 @@
                 </div>
             </div>
 
-            <p class="serif-title text-2xl text-pink-600">Kocham Cię ❤️</p>
+            <!-- Przycisk do przejścia do galerii -->
+            <button onclick="showGallery(event)" class="bg-white hover:bg-pink-50 text-pink-600 font-semibold py-3 px-6 rounded-xl text-sm border border-pink-200 shadow-sm transition-all hover:scale-105">
+                Nasze chwile ❤️
+            </button>
+        </div>
+    </div>
+
+    <!-- Etap 3: Galeria zdjęć (Początkowo ukryta) -->
+    <div id="gallery-section" class="hidden-section w-full max-w-4xl pt-8 pb-20">
+        <div class="text-center mb-10">
+            <h2 class="serif-title text-4xl text-gray-900 mb-2">Tyle wspomnień...</h2>
+            <p class="text-gray-500 font-light">...i jeszcze więcej przed nami.</p>
         </div>
 
+        <!-- Kontener Grid/Flex dla "rozrzuconych" zdjęć -->
+        <div class="flex flex-wrap justify-center gap-6 px-4">
+            
+            <!-- Zdjęcie 1: Paryż -->
+            <div class="polaroid w-40 md:w-56 transform rotate-[-3deg]">
+                <img src="IMG20220905114819.jpg" alt="Paryż">
+            </div>
+
+            <!-- Zdjęcie 2: Chorwacja/Skały -->
+            <div class="polaroid w-40 md:w-56 transform rotate-[4deg] mt-8">
+                <img src="IMG20230924121447.jpg" alt="Wakacje">
+            </div>
+
+            <!-- Zdjęcie 3: Wesołe miasteczko -->
+            <div class="polaroid w-40 md:w-56 transform rotate-[-2deg]">
+                <img src="IMG20220919222753.jpg" alt="Wesołe miasteczko">
+            </div>
+
+            <!-- Zdjęcie 4: Tor wyścigowy -->
+            <div class="polaroid w-40 md:w-56 transform rotate-[5deg] mt-4">
+                <img src="IMG_20250628_174022.jpg" alt="Tor wyścigowy">
+            </div>
+
+            <!-- Zdjęcie 5: Wrocław/Hala Stulecia -->
+            <div class="polaroid w-40 md:w-56 transform rotate-[-4deg] mt-6">
+                <img src="IMG20230812130832.jpg" alt="Wrocław">
+            </div>
+
+            <!-- Zdjęcie 6: Skały/Czapka -->
+            <div class="polaroid w-40 md:w-56 transform rotate-[2deg]">
+                <img src="IMG_20250924_174025.jpg" alt="Wycieczka">
+            </div>
+
+             <!-- Zdjęcie 7: Domowe -->
+             <div class="polaroid w-40 md:w-56 transform rotate-[-5deg] mt-8">
+                <img src="IMG_20191116_172329.jpg" alt="Razem">
+            </div>
+            
+        </div>
+        
+        <div class="text-center mt-12">
+            <button onclick="location.reload()" class="text-gray-400 hover:text-pink-500 text-sm underline transition-colors">
+                Zacznij od nowa
+            </button>
+        </div>
     </div>
 
     <script>
@@ -184,33 +252,21 @@
         let moveCount = 0;
         const phrases = ["Nie klikaj tu!", "Serio?", "Przemyśl to...", "Jeszcze raz?", "No weź!"];
 
-        // Funkcja do "klikalnych" serduszek na tle
         document.body.addEventListener('click', function(e) {
-            // Ignorujemy kliknięcia w przyciski, żeby nie robić bałaganu
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.polaroid')) return;
 
             const heart = document.createElement('div');
             heart.classList.add('click-heart');
-            heart.innerHTML = '💖'; // Możesz zmienić na 🌸 lub ❤️
-            
-            // Pozycja kliknięcia
+            heart.innerHTML = '💖';
             heart.style.left = e.clientX + 'px';
             heart.style.top = e.clientY + 'px';
-            
-            // Losowa lekka rotacja
             const randomRot = Math.random() * 40 - 20;
             heart.style.transform = `translate(-50%, -50%) rotate(${randomRot}deg)`;
-
             document.body.appendChild(heart);
-
-            // Usunięcie elementu po zakończeniu animacji
-            setTimeout(() => {
-                heart.remove();
-            }, 1000);
+            setTimeout(() => heart.remove(), 1000);
         });
 
         function moveButton() {
-            // Przenosimy przycisk do body przy pierwszym ruchu, aby uniknąć problemów z pozycjonowaniem wewnątrz karty
             if (noBtn.parentNode !== document.body) {
                 const rect = noBtn.getBoundingClientRect();
                 noBtn.style.left = rect.left + 'px';
@@ -222,7 +278,6 @@
             const btnWidth = noBtn.offsetWidth;
             const btnHeight = noBtn.offsetHeight;
             const padding = 20; 
-            
             const maxX = window.innerWidth - btnWidth - padding;
             const maxY = window.innerHeight - btnHeight - padding;
             const minX = padding;
@@ -237,14 +292,10 @@
                 noBtn.style.left = `${x}px`;
                 noBtn.style.top = `${y}px`;
                 noBtn.style.zIndex = '100';
-                
                 noBtn.innerText = phrases[moveCount % phrases.length];
                 noBtn.classList.add('bg-gray-100'); 
             } else {
                 noBtn.style.position = 'static';
-                // Musimy go wsadzić z powrotem do kontenera przycisków, jeśli chcemy żeby ładnie wyglądał
-                // Ale prościej po prostu go zmienić tam gdzie jest, albo ukryć
-                // Tutaj zmieniamy go w "Tak" w miejscu gdzie wylądował
                 noBtn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200', 'bg-gray-100');
                 noBtn.classList.add('bg-pink-500', 'text-white', 'shadow-lg');
                 noBtn.style.transform = "scale(1.1)";
@@ -256,9 +307,7 @@
         }
 
         function acceptProposal(e) {
-            // Jeśli event istnieje, zatrzymaj propagację, żeby nie tworzyć serca w tle
             if(e) e.stopPropagation();
-
             const noBtn = document.getElementById('noBtn');
             if(noBtn) noBtn.style.display = 'none';
 
@@ -266,12 +315,30 @@
             const question = document.getElementById('question-section');
             
             question.style.display = 'none';
-            details.classList.add('visible-details');
+            details.classList.add('visible-section');
             fireConfetti();
         }
 
+        function showGallery(e) {
+            if(e) e.stopPropagation();
+            
+            // Ukrywamy główną kartę
+            const mainCard = document.getElementById('main-card');
+            mainCard.style.display = 'none';
+            
+            // Pokazujemy galerię
+            const gallery = document.getElementById('gallery-section');
+            gallery.classList.add('visible-section');
+            
+            // Dodatkowe konfetti na start galerii
+            fireConfetti();
+            
+            // Scroll na górę
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
         function fireConfetti() {
-            const duration = 3 * 1000;
+            const duration = 2 * 1000;
             const animationEnd = Date.now() + duration;
             const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
