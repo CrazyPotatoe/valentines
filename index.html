@@ -14,8 +14,7 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f3e8ff; /* Bardzo jasny fiolet/róż */
-            /* Abstrakcyjne tło gradientowe - bardziej modern */
+            background-color: #f3e8ff; 
             background-image: 
                 radial-gradient(at 0% 0%, hsla(349,49%,75%,1) 0, transparent 50%), 
                 radial-gradient(at 100% 0%, hsla(280,40%,85%,1) 0, transparent 50%), 
@@ -24,6 +23,9 @@
             background-attachment: fixed;
             min-height: 100vh;
             color: #1f2937;
+            overflow-x: hidden; /* Zapobiega paskom przewijania przy animacjach */
+            user-select: none; /* Zapobiega zaznaczaniu tekstu przy szybkim klikaniu */
+            -webkit-tap-highlight-color: transparent; /* Usuwa podświetlenie tapnięcia na mobile */
         }
 
         .serif-title {
@@ -31,7 +33,6 @@
             letter-spacing: -0.02em;
         }
 
-        /* Animacja pulsującego serca - subtelna */
         @keyframes soft-beat {
             0% { transform: scale(1); }
             50% { transform: scale(1.1); }
@@ -40,11 +41,10 @@
 
         .heart-icon {
             animation: soft-beat 2s infinite ease-in-out;
-            color: #ec4899; /* Pink-500 */
+            color: #ec4899;
             filter: drop-shadow(0 4px 6px rgba(236, 72, 153, 0.3));
         }
 
-        /* Sekcje */
         .hidden-details {
             display: none;
             opacity: 0;
@@ -58,16 +58,15 @@
             transform: translateY(0);
         }
 
-        /* Glassmorphism Card */
         .glass-card {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.8);
             box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.1s ease;
         }
         
-        /* Modern Button Gradient */
         .btn-primary {
             background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
             transition: transform 0.2s, box-shadow 0.2s;
@@ -75,12 +74,36 @@
         .btn-primary:active {
             transform: scale(0.98);
         }
+
+        /* Nowa animacja dla klikanych serduszek */
+        .click-heart {
+            position: fixed;
+            pointer-events: none;
+            animation: floatUp 1s ease-out forwards;
+            font-size: 24px;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                transform: translate(-50%, -150%) scale(1);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body class="flex items-center justify-center p-4">
 
-    <!-- Główna karta: Glassmorphism -->
-    <div class="glass-card rounded-[2rem] w-full max-w-md p-8 md:p-10 text-center relative overflow-hidden">
+    <!-- Główna karta -->
+    <div class="glass-card rounded-[2rem] w-full max-w-md p-8 md:p-10 text-center relative overflow-hidden z-10">
         
         <!-- Etap 1: Pytanie -->
         <div id="question-section">
@@ -90,7 +113,7 @@
                 </svg>
             </div>
 
-            <p class="text-gray-500 font-medium tracking-wide uppercase text-xs mb-4">Ważne pytanie do <span class="text-pink-600 font-bold">Kinii</span></p>
+            <p class="text-gray-500 font-medium tracking-wide uppercase text-xs mb-4">Mam ważne pytanie <span class="text-pink-600 font-bold">Kinia</span></p>
 
             <h1 class="serif-title text-5xl md:text-6xl text-gray-900 mb-8 leading-tight">
                 Zostaniesz moją <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-600">Walentynką?</span>
@@ -98,8 +121,10 @@
 
             <div class="flex flex-col gap-4 justify-center items-center relative h-40">
                 <!-- Przycisk TAK -->
-                <button onclick="acceptProposal()" class="btn-primary w-full text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-xl shadow-pink-500/30 z-20">
-                    Tak, z przyjemnością!
+                <button onclick="acceptProposal(event)" class="btn-primary w-full text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-xl shadow-pink-500/30 z-20 relative overflow-hidden group">
+                    <span class="relative z-10">Tak, z przyjemnością!</span>
+                    <!-- Subtelny efekt błysku na przycisku -->
+                    <div class="absolute inset-0 h-full w-full scale-0 rounded-2xl transition-all duration-300 group-hover:scale-100 group-hover:bg-white/20"></div>
                 </button>
 
                 <!-- Przycisk NIE (ucieka) -->
@@ -159,16 +184,47 @@
         let moveCount = 0;
         const phrases = ["Nie klikaj tu!", "Serio?", "Przemyśl to...", "Jeszcze raz?", "No weź!"];
 
-        function moveButton() {
-            // Zmniejszamy obszar "uciekania", żeby guzik nie uciekł za daleko od karty
-            const containerRect = document.querySelector('.glass-card').getBoundingClientRect();
+        // Funkcja do "klikalnych" serduszek na tle
+        document.body.addEventListener('click', function(e) {
+            // Ignorujemy kliknięcia w przyciski, żeby nie robić bałaganu
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+
+            const heart = document.createElement('div');
+            heart.classList.add('click-heart');
+            heart.innerHTML = '💖'; // Możesz zmienić na 🌸 lub ❤️
             
-            // Margines bezpieczeństwa
+            // Pozycja kliknięcia
+            heart.style.left = e.clientX + 'px';
+            heart.style.top = e.clientY + 'px';
+            
+            // Losowa lekka rotacja
+            const randomRot = Math.random() * 40 - 20;
+            heart.style.transform = `translate(-50%, -50%) rotate(${randomRot}deg)`;
+
+            document.body.appendChild(heart);
+
+            // Usunięcie elementu po zakończeniu animacji
+            setTimeout(() => {
+                heart.remove();
+            }, 1000);
+        });
+
+        function moveButton() {
+            // Przenosimy przycisk do body przy pierwszym ruchu, aby uniknąć problemów z pozycjonowaniem wewnątrz karty
+            if (noBtn.parentNode !== document.body) {
+                const rect = noBtn.getBoundingClientRect();
+                noBtn.style.left = rect.left + 'px';
+                noBtn.style.top = rect.top + 'px';
+                document.body.appendChild(noBtn);
+                noBtn.style.position = 'fixed';
+            }
+
+            const btnWidth = noBtn.offsetWidth;
+            const btnHeight = noBtn.offsetHeight;
             const padding = 20; 
             
-            // Obliczamy nowe koordynaty WZGLĘDEM OKNA (fixed)
-            const maxX = window.innerWidth - noBtn.offsetWidth - padding;
-            const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+            const maxX = window.innerWidth - btnWidth - padding;
+            const maxY = window.innerHeight - btnHeight - padding;
             const minX = padding;
             const minY = padding;
 
@@ -178,16 +234,18 @@
             moveCount++;
             
             if (moveCount < 6) {
-                noBtn.style.position = 'fixed';
                 noBtn.style.left = `${x}px`;
                 noBtn.style.top = `${y}px`;
-                noBtn.style.zIndex = '100'; // Żeby był nad wszystkim
+                noBtn.style.zIndex = '100';
                 
                 noBtn.innerText = phrases[moveCount % phrases.length];
-                noBtn.classList.add('bg-gray-100'); // Zmiana koloru przy ucieczce
+                noBtn.classList.add('bg-gray-100'); 
             } else {
                 noBtn.style.position = 'static';
-                noBtn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200');
+                // Musimy go wsadzić z powrotem do kontenera przycisków, jeśli chcemy żeby ładnie wyglądał
+                // Ale prościej po prostu go zmienić tam gdzie jest, albo ukryć
+                // Tutaj zmieniamy go w "Tak" w miejscu gdzie wylądował
+                noBtn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200', 'bg-gray-100');
                 noBtn.classList.add('bg-pink-500', 'text-white', 'shadow-lg');
                 noBtn.style.transform = "scale(1.1)";
                 noBtn.innerText = "No dobrze... TAK! 💖";
@@ -197,16 +255,17 @@
             }
         }
 
-        function acceptProposal() {
+        function acceptProposal(e) {
+            // Jeśli event istnieje, zatrzymaj propagację, żeby nie tworzyć serca w tle
+            if(e) e.stopPropagation();
+
             const noBtn = document.getElementById('noBtn');
             if(noBtn) noBtn.style.display = 'none';
 
             const details = document.getElementById('details-section');
             const question = document.getElementById('question-section');
             
-            // Subtelne ukrycie pytania
             question.style.display = 'none';
-            
             details.classList.add('visible-details');
             fireConfetti();
         }
