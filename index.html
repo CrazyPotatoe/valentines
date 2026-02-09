@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pytanie do Ciebie...</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Konfetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Nowoczesne fonty: Playfair Display (Elegancki) + Inter (Czysty) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3e8ff; /* Bardzo jasny fiolet/róż */
+            /* Abstrakcyjne tło gradientowe - bardziej modern */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(349,49%,75%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(280,40%,85%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(335,50%,79%,1) 0, transparent 50%), 
+                radial-gradient(at 0% 100%, hsla(22,100%,77%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .serif-title {
+            font-family: 'Playfair Display', serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Animacja pulsującego serca - subtelna */
+        @keyframes soft-beat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .heart-icon {
+            animation: soft-beat 2s infinite ease-in-out;
+            color: #ec4899; /* Pink-500 */
+            filter: drop-shadow(0 4px 6px rgba(236, 72, 153, 0.3));
+        }
+
+        /* Sekcje */
+        .hidden-details {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .visible-details {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Glassmorphism Card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Modern Button Gradient */
+        .btn-primary {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <!-- Główna karta: Glassmorphism -->
+    <div class="glass-card rounded-[2rem] w-full max-w-md p-8 md:p-10 text-center relative overflow-hidden">
+        
+        <!-- Etap 1: Pytanie -->
+        <div id="question-section">
+            <div class="mb-8 flex justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="currentColor" class="heart-icon">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+            </div>
+
+            <p class="text-gray-500 font-medium tracking-wide uppercase text-xs mb-4">Ważne pytanie do <span class="text-pink-600 font-bold">Kinii</span></p>
+
+            <h1 class="serif-title text-5xl md:text-6xl text-gray-900 mb-8 leading-tight">
+                Zostaniesz moją <span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-rose-600">Walentynką?</span>
+            </h1>
+
+            <div class="flex flex-col gap-4 justify-center items-center relative h-40">
+                <!-- Przycisk TAK -->
+                <button onclick="acceptProposal()" class="btn-primary w-full text-white font-semibold py-4 px-8 rounded-2xl text-lg shadow-xl shadow-pink-500/30 z-20">
+                    Tak, z przyjemnością!
+                </button>
+
+                <!-- Przycisk NIE (ucieka) -->
+                <button id="noBtn" onmouseover="moveButton()" ontouchstart="moveButton()" class="bg-white hover:bg-gray-50 text-gray-500 font-medium py-3 px-6 rounded-xl text-sm border border-gray-200 shadow-sm absolute bottom-0 z-10 transition-colors">
+                    Nie, mam inne plany
+                </button>
+            </div>
+        </div>
+
+        <!-- Etap 2: Szczegóły -->
+        <div id="details-section" class="hidden-details mt-2">
+            <div class="w-16 h-1 bg-pink-200 mx-auto rounded-full mb-6"></div>
+            
+            <h3 class="serif-title text-3xl text-gray-900 mb-2">Jesteś cudowna.</h3>
+            <p class="text-gray-500 mb-8 font-light">Nie mogę się doczekać naszego wieczoru.</p>
+            
+            <!-- Karta ze szczegółami -->
+            <div class="bg-white/60 rounded-2xl p-6 text-left shadow-sm border border-white space-y-4 mb-8">
+                <div class="flex items-start">
+                    <div class="bg-pink-100 p-2 rounded-lg mr-4 text-pink-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Data</p>
+                        <p class="text-gray-800 font-medium">14 Lutego, Piątek</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="bg-pink-100 p-2 rounded-lg mr-4 text-pink-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Godzina</p>
+                        <p class="text-gray-800 font-medium">19:00</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-start">
+                    <div class="bg-pink-100 p-2 rounded-lg mr-4 text-pink-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-wider">Miejsce</p>
+                        <p class="text-gray-800 font-medium">[Nazwa Restauracji / Miejsce]</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="serif-title text-2xl text-pink-600">Kocham Cię ❤️</p>
+        </div>
+
+    </div>
+
+    <script>
+        const noBtn = document.getElementById('noBtn');
+        let moveCount = 0;
+        const phrases = ["Nie klikaj tu!", "Serio?", "Przemyśl to...", "Jeszcze raz?", "No weź!"];
+
+        function moveButton() {
+            // Zmniejszamy obszar "uciekania", żeby guzik nie uciekł za daleko od karty
+            const containerRect = document.querySelector('.glass-card').getBoundingClientRect();
+            
+            // Margines bezpieczeństwa
+            const padding = 20; 
+            
+            // Obliczamy nowe koordynaty WZGLĘDEM OKNA (fixed)
+            const maxX = window.innerWidth - noBtn.offsetWidth - padding;
+            const maxY = window.innerHeight - noBtn.offsetHeight - padding;
+            const minX = padding;
+            const minY = padding;
+
+            let x = Math.random() * (maxX - minX) + minX;
+            let y = Math.random() * (maxY - minY) + minY;
+            
+            moveCount++;
+            
+            if (moveCount < 6) {
+                noBtn.style.position = 'fixed';
+                noBtn.style.left = `${x}px`;
+                noBtn.style.top = `${y}px`;
+                noBtn.style.zIndex = '100'; // Żeby był nad wszystkim
+                
+                noBtn.innerText = phrases[moveCount % phrases.length];
+                noBtn.classList.add('bg-gray-100'); // Zmiana koloru przy ucieczce
+            } else {
+                noBtn.style.position = 'static';
+                noBtn.classList.remove('bg-white', 'text-gray-500', 'border-gray-200');
+                noBtn.classList.add('bg-pink-500', 'text-white', 'shadow-lg');
+                noBtn.style.transform = "scale(1.1)";
+                noBtn.innerText = "No dobrze... TAK! 💖";
+                noBtn.onclick = acceptProposal;
+                noBtn.onmouseover = null;
+                noBtn.ontouchstart = null;
+            }
+        }
+
+        function acceptProposal() {
+            const noBtn = document.getElementById('noBtn');
+            if(noBtn) noBtn.style.display = 'none';
+
+            const details = document.getElementById('details-section');
+            const question = document.getElementById('question-section');
+            
+            // Subtelne ukrycie pytania
+            question.style.display = 'none';
+            
+            details.classList.add('visible-details');
+            fireConfetti();
+        }
+
+        function fireConfetti() {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
+                const particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }, colors: ['#ec4899', '#db2777', '#fbcfe8'] }));
+                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }, colors: ['#ec4899', '#db2777', '#fbcfe8'] }));
+            }, 250);
+        }
+    </script>
+</body>
+</html>
