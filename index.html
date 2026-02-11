@@ -187,11 +187,11 @@
     <div id="gallery-section" class="hidden-section w-full max-w-4xl pt-8 pb-20">
         <div class="text-center mb-10">
             <h2 class="serif-title text-4xl text-gray-900 mb-2">Tyle wspomnień...</h2>
-            <p class="text-gray-500 font-light">...i jeszcze więcej przed nami</p>
+            <p class="text-gray-500 font-light">...i jeszcze więcej przed nami.</p>
         </div>
 
         <!-- Kontener Grid/Flex dla "rozrzuconych" zdjęć -->
-        <div class="flex flex-wrap justify-center gap-8 px-4">
+        <div class="flex flex-wrap justify-center gap-8 px-4 mb-16">
             
             <!-- Zdjęcie 1: Paryż -->
             <div class="polaroid w-72 md:w-80 transform rotate-[-3deg]">
@@ -230,9 +230,35 @@
             
         </div>
         
-        <div class="text-center mt-12">
-            <button onclick="location.reload()" class="text-gray-400 hover:text-pink-500 text-sm underline transition-colors">
-                Zacznij od nowa
+        <!-- Przycisk do sekretnej lokacji na dole galerii -->
+        <div class="text-center mt-8 mb-12">
+            <button onclick="revealSecretLocation(event)" class="bg-gradient-to-r from-rose-400 to-pink-500 text-white font-bold py-4 px-10 rounded-full text-lg shadow-xl transform transition-all hover:scale-105 hover:shadow-2xl animate-bounce">
+                Jeden ostatni sekret... 🤫
+            </button>
+        </div>
+    </div>
+
+    <!-- Etap 4: Sekretna Lokacja (Nowy Jork) -->
+    <div id="location-section" class="hidden-section w-full max-w-md p-6">
+        <div class="glass-card rounded-[2rem] p-8 text-center relative overflow-hidden">
+            <p class="text-pink-600 font-bold uppercase tracking-widest text-xs mb-2">Pakuj walizki</p>
+            <h2 class="serif-title text-4xl text-gray-900 mb-6">Zabieram Cię do...</h2>
+            
+            <!-- Obrazek kawiarni (Placeholder w klimacie kwiatowym) -->
+            <div class="rounded-xl overflow-hidden mb-6 shadow-lg rotate-1 border-4 border-white">
+                <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Kawa i Kwiaty" class="w-full h-64 object-cover">
+            </div>
+
+            <h1 class="serif-title text-3xl md:text-4xl text-gray-800 mb-2 leading-tight">RHYTHM ZERO</h1>
+            <p class="text-gray-500 mb-8 font-light italic">New York, NY</p>
+
+            <a href="https://maps.app.goo.gl/kFRko2KmBx2EiBNm6" target="_blank" class="inline-flex items-center justify-center w-full bg-gray-900 text-white font-medium py-4 px-6 rounded-xl hover:bg-gray-800 transition-colors shadow-lg group">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 group-hover:animate-pulse"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                Zobacz na mapie
+            </a>
+            
+            <button onclick="location.reload()" class="mt-6 text-xs text-gray-400 hover:text-pink-500 underline">
+                Wróć na początek
             </button>
         </div>
     </div>
@@ -243,7 +269,8 @@
         const phrases = ["Nie klikaj tu!", "Serio?", "Przemyśl to...", "Jeszcze raz?", "No weź!"];
 
         document.body.addEventListener('click', function(e) {
-            if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('.polaroid')) return;
+            // Blokujemy serduszka jeśli kliknięto w link lub przycisk
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('a') || e.target.closest('.polaroid')) return;
 
             const heart = document.createElement('div');
             heart.classList.add('click-heart');
@@ -312,18 +339,53 @@
         function showGallery(e) {
             if(e) e.stopPropagation();
             
-            // Ukrywamy główną kartę
             const mainCard = document.getElementById('main-card');
             mainCard.style.display = 'none';
             
-            // Pokazujemy galerię
             const gallery = document.getElementById('gallery-section');
             gallery.classList.add('visible-section');
             
-            // Dodatkowe konfetti na start galerii
             fireConfetti();
             
-            // Scroll na górę
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function revealSecretLocation(e) {
+            if(e) e.stopPropagation();
+
+            // Ukrywamy galerię
+            const gallery = document.getElementById('gallery-section');
+            gallery.style.display = 'none';
+
+            // Pokazujemy lokację
+            const locationSection = document.getElementById('location-section');
+            locationSection.classList.add('visible-section');
+
+            // Dużo konfetti na finał!
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#ec4899', '#db2777']
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#ec4899', '#db2777']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+            }());
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
